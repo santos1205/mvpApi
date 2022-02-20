@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using mvpApi.Configuration;
 using mvpApi.DTOs;
 using mvpApi.Services.Interfaces;
@@ -22,76 +23,74 @@ namespace mvpApi.Services
         public UsuarioDTO ConsultarUsuarioPorCpfCnpj(string CpfCnpj)
         {
             throw new NotImplementedException();
-        }
+        }       
 
-        public object GerarToken(UsuarioDTO UsuarioDTO, [FromServices] SigningConfigurations SigningConfigurations, [FromServices] TokenConfigurations TokenConfigurations)
+        public object GerarToken(
+            UsuarioDTO UsuarioDTO,
+            [FromServices] SigningConfigurations SigningConfigurations,
+            [FromServices] TokenConfigurations TokenConfigurations)
         {
-            throw new NotImplementedException();
+            try
+            {
+                // TODO: USUARIO REPOSITORY
+                //var UsuarioSettings = _IUsuarioRepository.ConsultarPorEmail(UsuarioDTO.email).FirstOrDefault();
+
+                //if (UsuarioSettings == null)
+                //{
+                //    throw new Exception();
+                //}
+
+                //if (UsuarioSettings.UsrEmail.Equals(UsuarioDTO.email)
+                //    && UsuarioSettings.UsrSenha.Equals(UsuarioDTO.senha))
+                if (UsuarioDTO.email.Equals("mario@santos.com")
+                    && UsuarioDTO.senha.Equals("123"))
+                    {
+
+                    ClaimsIdentity identity =
+                        new ClaimsIdentity(new GenericIdentity(UsuarioDTO.email, "Autenticacao"),
+                                            new[] {
+                                                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
+                                                    new Claim(JwtRegisteredClaimNames.UniqueName, UsuarioDTO.email),
+                                            });
+
+                    DateTime dataCriacao = DateTime.Now;
+                    DateTime dataExpiracao = dataCriacao + TimeSpan.FromSeconds(TokenConfigurations.Seconds);
+
+                    var handler = new JwtSecurityTokenHandler();
+                    var securityToken = handler.CreateToken(new SecurityTokenDescriptor
+                    {
+                        Issuer = TokenConfigurations.Issuer,
+                        Audience = TokenConfigurations.Audience,
+                        SigningCredentials = SigningConfigurations.SigningCredentials,
+                        Subject = identity,
+                        NotBefore = dataCriacao,
+                        Expires = dataExpiracao
+                    });
+                    var token = handler.WriteToken(securityToken);
+
+                    return new
+                    {
+                        sucess = "True",
+                        access_token = token,
+                        expires_in = TimeSpan.FromMilliseconds(TokenConfigurations.Seconds),
+                        token_type = "BearerToken",
+                        usuario = UsuarioDTO.nome
+                    };
+                }
+                else
+                {
+                    throw new Exception();
+                }
+            }
+            catch
+            {
+                return new
+                {
+                    sucess = "false",
+                    authenticated = false,
+                    message = "falha ao autenticar"
+                };
+            }
         }
-
-        //public object GerarToken(
-        //    UsuarioDTO UsuarioDTO, 
-        //    [FromServices] SigningConfigurations SigningConfigurations, 
-        //    [FromServices] TokenConfigurations TokenConfigurations)
-        //{
-        //    try
-        //    {
-        //        var UsuarioSettings = _IUsuarioRepository.ConsultarPorEmail(UsuarioDTO.email).FirstOrDefault();
-
-        //        if (UsuarioSettings == null)
-        //        {
-        //            throw new Exception();
-        //        }
-
-        //        if (UsuarioSettings.UsrEmail.Equals(UsuarioDTO.email)
-        //            && UsuarioSettings.UsrSenha.Equals(UsuarioDTO.senha))
-        //        {
-
-        //            ClaimsIdentity identity =
-        //                new ClaimsIdentity(new GenericIdentity(UsuarioDTO.email, "Autenticacao"),
-        //                                    new[] {
-        //                                            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
-        //                                            new Claim(JwtRegisteredClaimNames.UniqueName, UsuarioDTO.email),
-        //                                    });
-
-        //            DateTime dataCriacao = DateTime.Now;
-        //            DateTime dataExpiracao = dataCriacao + TimeSpan.FromSeconds(TokenConfigurations.Seconds);
-
-        //            var handler = new JwtSecurityTokenHandler();
-        //            var securityToken = handler.CreateToken(new SecurityTokenDescriptor
-        //            {
-        //                Issuer = TokenConfigurations.Issuer,
-        //                Audience = TokenConfigurations.Audience,
-        //                SigningCredentials = SigningConfigurations.SigningCredentials,
-        //                Subject = identity,
-        //                NotBefore = dataCriacao,
-        //                Expires = dataExpiracao
-        //            });
-        //            var token = handler.WriteToken(securityToken);
-
-        //            return new
-        //            {
-        //                sucess = "True",
-        //                access_token = token,
-        //                expires_in = TimeSpan.FromMilliseconds(TokenConfigurations.Seconds),
-        //                token_type = "BearerToken",
-        //                usuario = UsuarioDTO.nome
-        //            };
-        //        }
-        //        else
-        //        {
-        //            throw new Exception();
-        //        }
-        //    }
-        //    catch
-        //    {
-        //        return new
-        //        {
-        //            sucess = "false",
-        //            authenticated = false,
-        //            message = "falha ao autenticar"
-        //        };
-        //    }
-        //}
     }
 }

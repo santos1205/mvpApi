@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using mvpApi.Configuration;
 using mvpApi.DTOs;
 using mvpApi.Services.Interfaces;
 using System;
@@ -7,14 +9,15 @@ using System.ComponentModel.DataAnnotations;
 
 namespace mvpApi.Controllers
 {
+    [Authorize("Bearer")]
     public class UsuarioController : ApplicationController
     {
-        private readonly IUsuarioService _iUsuarioService;        
+        private readonly IUsuarioService _iUsuarioService;
 
         public UsuarioController(IUsuarioService IUsuarioService)
         {
             _iUsuarioService = IUsuarioService;
-        }        
+        }
 
         [HttpPost("api/usuario/cadastrar/")]
         public object Post([FromBody] UsuarioDTO usuarioDTO)
@@ -77,5 +80,32 @@ namespace mvpApi.Controllers
             }
         }
 
+        [AllowAnonymous]
+        [HttpPost("api/admin/token/")]
+        public object Autenticacao([FromBody] UsuarioDTO usuarioDTO,
+                            [FromServices] SigningConfigurations signingConfigurations,
+                            [FromServices] TokenConfigurations tokenConfigurations)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(usuarioDTO.email) || string.IsNullOrEmpty(usuarioDTO.senha))
+                {
+                    throw new Exception("Email e senha são obrigatórios");
+                }
+
+                var Objeto = new object();
+
+                if (usuarioDTO != null)
+                {
+                    Objeto = _iUsuarioService.GerarToken(usuarioDTO, signingConfigurations, tokenConfigurations);
+                }
+
+                return Ok(Objeto);
+            }
+            catch (System.Exception ex)
+            {
+                return Ok(new { error = ex.Message });
+            }
+        }
     }
 }
