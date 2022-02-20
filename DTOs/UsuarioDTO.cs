@@ -17,13 +17,7 @@ namespace mvpApi.DTOs
         public string nome { get; set; }
         [NotMapped]
         [Required(ErrorMessage = "cpf / cnpj obrigatório")]
-        public string cpf_cnpj { get; set; }
-        [NotMapped, JsonIgnore]
-        //[CPFValidation(ErrorMessage = "Insira um CPF válido")]
-        public string cpf_validacao { get; set; }
-        [NotMapped, JsonIgnore]
-        //[CNPJValidation(ErrorMessage = "Insira um CNPJ válido")]
-        public string cnpj_validacao { get; set; }
+        public string cpf_cnpj { get; set; }        
         [NotMapped]
         [EmailAddress(ErrorMessage = "Email inválido")]
         public string email { get; set; }
