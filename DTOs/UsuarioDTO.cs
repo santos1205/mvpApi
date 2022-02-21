@@ -11,7 +11,7 @@ namespace mvpApi.DTOs
     public class UsuarioDTO
     {
         [NotMapped]
-        public int? IdUsuario { get; set; }
+        public int? id { get; set; }
         [NotMapped]
         [Required(ErrorMessage = "Nome do usuário obrigatório")]
         public string nome { get; set; }
