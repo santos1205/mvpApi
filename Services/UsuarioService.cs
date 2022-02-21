@@ -2,6 +2,8 @@
 using Microsoft.IdentityModel.Tokens;
 using mvpApi.Configuration;
 using mvpApi.DTOs;
+using mvpApi.Models;
+using mvpApi.Repositories;
 using mvpApi.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -15,14 +17,43 @@ namespace mvpApi.Services
 {
     public class UsuarioService : IUsuarioService
     {
+
+        private readonly IUsuarioRepository _iUsuarioRepository;
+
+        public UsuarioService(IUsuarioRepository iUsuarioRepository)
+        {
+            _iUsuarioRepository = iUsuarioRepository;
+        }
+
         public void CadastrarUsuario(UsuarioDTO UsuarioDTO)
         {
-            throw new NotImplementedException();
+            // TODO: otimizar usando autoMapper
+            var usuarioBase = new Usuario();
+
+            usuarioBase.Id = (int)UsuarioDTO.id;
+            usuarioBase.Nome = UsuarioDTO.nome;
+            usuarioBase.CpfCnpj = UsuarioDTO.cpf_cnpj;
+            usuarioBase.Email = UsuarioDTO.email;
+            // senha deve ser criptografada
+            usuarioBase.Senha = UsuarioDTO.senha;
+
+            _iUsuarioRepository.Insert(usuarioBase);
         }
 
         public UsuarioDTO ConsultarUsuarioPorCpfCnpj(string CpfCnpj)
         {
-            throw new NotImplementedException();
+            // TODO: Otimizar com autoMapper
+            var usuarioBase = _iUsuarioRepository.ConsultaUsuariosPorCPF(CpfCnpj).FirstOrDefault();
+            var usuarioDTO = new UsuarioDTO();
+
+            usuarioDTO.id = usuarioBase.Id;
+
+            usuarioDTO.nome = usuarioBase.Nome;
+            usuarioDTO.email = usuarioBase.Email;
+            usuarioDTO.cpf_cnpj = usuarioBase.CpfCnpj;
+            usuarioDTO.senha = usuarioBase.Senha;
+
+            return usuarioDTO;
         }       
 
         public object GerarToken(

@@ -9,7 +9,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace mvpApi.Controllers
 {
-    [Authorize("Bearer")]
+    //[Authorize("Bearer")]
     public class UsuarioController : ApplicationController
     {
         private readonly IUsuarioService _iUsuarioService;
@@ -27,26 +27,26 @@ namespace mvpApi.Controllers
                 var validationResults = new List<ValidationResult>();
 
                 // Verificação cpf / cnpj
-                //if (!string.IsNullOrEmpty(Usuario.cpf_cnpj))
+                //if (!string.IsNullOrEmpty(usuarioDTO.cpf_cnpj))
                 //{
-                //    if (Usuario.cpf_cnpj.Length > 14)
+                //    if (usuarioDTO.cpf_cnpj.Length > 14)
                 //    {
-                //        Usuario.cnpj_validacao = Usuario.cpf_cnpj;
+                //        usuarioDTO.cnpj_validacao = usuarioDTO.cpf_cnpj;
                 //    }
                 //    else
                 //    {
-                //        Usuario.cpf_validacao = Usuario.cpf_cnpj;
+                //        usuarioDTO.cpf_validacao = usuarioDTO.cpf_cnpj;
                 //    }
                 //}
 
-                //// Verificação de validação de campos
-                //bool isUsuarioValid = CheckValidations(Usuario, ref validationResults);
-                //if (!isUsuarioValid)
-                //{
-                //    return Ok(new { error = validationResults });
-                //}
+                // Verificação de validação de campos
+                bool isUsuarioValid = CheckValidations(usuarioDTO, ref validationResults);
+                if (!isUsuarioValid)
+                {
+                    return Ok(new { error = validationResults });
+                }
 
-                //_iUsuarioService.CadastrarUsuario(Usuario);
+                _iUsuarioService.CadastrarUsuario(usuarioDTO);
 
                 return Ok(new { msg = "Usuário cadastrado com sucesso." });
             }

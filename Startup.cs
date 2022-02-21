@@ -6,12 +6,15 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using mvpApi.Configuration;
+using mvpApi.Models;
+using mvpApi.Repositories;
 using mvpApi.Services;
 using mvpApi.Services.Interfaces;
 using System;
@@ -50,7 +53,7 @@ namespace mvpApi
             //services.AddScoped<IEstadoCivilRepository, EstadoCivilRepository>();
             //services.AddScoped<IEnderecoRepository, EnderecoRepository>();
             //services.AddScoped<IPedidoRepository, PedidoRepository>();
-            //services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+            services.AddScoped<IUsuarioRepository, UsuarioRepository>();
             #endregion Interfaces_mapping       
 
             var signingConfigurations = new SigningConfigurations();
@@ -95,9 +98,8 @@ namespace mvpApi
                 .RequireAuthenticatedUser().Build());
             });
 
-            //services.AddDbContext<LeadsContext>(options => options
-            //                                        .UseLazyLoadingProxies()
-            //                                        .UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<masterContext>(options => options                                                    
+                                                    .UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
