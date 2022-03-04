@@ -81,23 +81,23 @@ namespace mvpApi.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("api/admin/token/")]
-        public object Autenticacao([FromBody] UsuarioDTO usuarioDTO,
+        [HttpPost("api/usuario/token/")]
+        public object Autenticacao([FromBody] UsuarioDTO usuario,
                             [FromServices] SigningConfigurations signingConfigurations,
                             [FromServices] TokenConfigurations tokenConfigurations)
         {
             try
             {
-                if (string.IsNullOrEmpty(usuarioDTO.email) || string.IsNullOrEmpty(usuarioDTO.senha))
+                if (string.IsNullOrEmpty(usuario.email) || string.IsNullOrEmpty(usuario.senha))
                 {
                     throw new Exception("Email e senha são obrigatórios");
                 }
 
                 var Objeto = new object();
 
-                if (usuarioDTO != null)
+                if (usuario != null)
                 {
-                    Objeto = _iUsuarioService.GerarToken(usuarioDTO, signingConfigurations, tokenConfigurations);
+                    Objeto = _iUsuarioService.GerarToken(usuario, signingConfigurations, tokenConfigurations);
                 }
 
                 return Ok(Objeto);
