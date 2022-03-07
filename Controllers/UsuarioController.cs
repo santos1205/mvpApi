@@ -9,7 +9,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace mvpApi.Controllers
 {
-    //[Authorize("Bearer")]
+    [Authorize("Bearer")]
     public class UsuarioController : ApplicationController
     {
         private readonly IUsuarioService _iUsuarioService;

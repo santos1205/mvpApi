@@ -54,58 +54,74 @@ namespace mvpApi.Services
             usuarioDTO.senha = usuarioBase.Senha;
 
             return usuarioDTO;
-        }       
+        }
+
+        public UsuarioDTO ConsultarUsuarioPorEmail(string email)
+        {
+            // TODO: Otimizar com autoMapper
+            var usuarioBase = _iUsuarioRepository.ConsultaUsuariosPorEmail(email).FirstOrDefault();
+            var usuarioDTO = new UsuarioDTO();
+
+            usuarioDTO.id = usuarioBase.Id;
+
+            usuarioDTO.nome = usuarioBase.Nome;
+            usuarioDTO.email = usuarioBase.Email;
+            usuarioDTO.cpf_cnpj = usuarioBase.CpfCnpj;
+            usuarioDTO.senha = usuarioBase.Senha;
+
+            return usuarioDTO;
+        }
 
         public object GerarToken(
-            UsuarioDTO UsuarioDTO,
-            [FromServices] SigningConfigurations SigningConfigurations,
-            [FromServices] TokenConfigurations TokenConfigurations)
+            UsuarioDTO usuarioDTO,
+            [FromServices] SigningConfigurations signingConfigurations,
+            [FromServices] TokenConfigurations tokenConfigurations)
         {
             try
             {
                 // TODO: USUARIO REPOSITORY
-                //var UsuarioSettings = _IUsuarioRepository.ConsultarPorEmail(UsuarioDTO.email).FirstOrDefault();
+                var UsuarioSettings = _iUsuarioRepository.ConsultaUsuariosPorEmail(usuarioDTO.email).FirstOrDefault();
 
-                //if (UsuarioSettings == null)
-                //{
-                //    throw new Exception();
-                //}
+                if (UsuarioSettings == null)
+                {
+                    throw new Exception();
+                }
 
-                //if (UsuarioSettings.UsrEmail.Equals(UsuarioDTO.email)
-                //    && UsuarioSettings.UsrSenha.Equals(UsuarioDTO.senha))
-                if (UsuarioDTO.email.Equals("mario@santos.com")
-                    && UsuarioDTO.senha.Equals("123"))
+                if (UsuarioSettings.Email.Equals(usuarioDTO.email)
+                    && UsuarioSettings.Senha.Equals(usuarioDTO.senha))                    
                     {
 
                     ClaimsIdentity identity =
-                        new ClaimsIdentity(new GenericIdentity(UsuarioDTO.email, "Autenticacao"),
+                        new ClaimsIdentity(new GenericIdentity(usuarioDTO.email, "Autenticacao"),
                                             new[] {
                                                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
-                                                    new Claim(JwtRegisteredClaimNames.UniqueName, UsuarioDTO.email),
+                                                    new Claim(JwtRegisteredClaimNames.UniqueName, usuarioDTO.email),
                                             });
 
                     DateTime dataCriacao = DateTime.Now;
-                    DateTime dataExpiracao = dataCriacao + TimeSpan.FromSeconds(TokenConfigurations.Seconds);
+                    DateTime dataExpiracao = dataCriacao + TimeSpan.FromSeconds(tokenConfigurations.Seconds);
 
                     var handler = new JwtSecurityTokenHandler();
                     var securityToken = handler.CreateToken(new SecurityTokenDescriptor
                     {
-                        Issuer = TokenConfigurations.Issuer,
-                        Audience = TokenConfigurations.Audience,
-                        SigningCredentials = SigningConfigurations.SigningCredentials,
+                        Issuer = tokenConfigurations.Issuer,
+                        Audience = tokenConfigurations.Audience,
+                        SigningCredentials = signingConfigurations.SigningCredentials,
                         Subject = identity,
                         NotBefore = dataCriacao,
                         Expires = dataExpiracao
                     });
                     var token = handler.WriteToken(securityToken);
 
+                    usuarioDTO.nome = UsuarioSettings.Nome;
+                    
                     return new
                     {
-                        sucess = "True",
+                        success = true,
                         access_token = token,
-                        expires_in = TimeSpan.FromMilliseconds(TokenConfigurations.Seconds),
+                        expires_in = TimeSpan.FromMilliseconds(tokenConfigurations.Seconds),
                         token_type = "BearerToken",
-                        usuario = UsuarioDTO.nome
+                        usuario = usuarioDTO
                     };
                 }
                 else

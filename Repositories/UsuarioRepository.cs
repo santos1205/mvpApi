@@ -25,7 +25,22 @@ namespace mvpApi.Repositories
                 throw ex;
             }
         }
-        
+
+        public IEnumerable<Usuario> ConsultaUsuariosPorEmail(string email)
+        {
+            try
+            {
+                var Usuarios = _dbContext.Usuario
+                            .Where(p => p.Email.Equals(email));
+
+                return Usuarios;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
     }
 
 
