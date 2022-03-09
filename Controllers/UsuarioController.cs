@@ -88,9 +88,9 @@ namespace mvpApi.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(usuario.email) || string.IsNullOrEmpty(usuario.senha))
+                if (string.IsNullOrEmpty(usuario.cpf) || string.IsNullOrEmpty(usuario.senha))
                 {
-                    throw new Exception("Email e senha são obrigatórios");
+                    throw new Exception("Cpf e senha são obrigatórios");
                 }
 
                 var Objeto = new object();

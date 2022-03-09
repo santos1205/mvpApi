@@ -11,6 +11,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace mvpApi.Services
@@ -32,7 +33,7 @@ namespace mvpApi.Services
 
             usuarioBase.Id = (int)UsuarioDTO.id;
             usuarioBase.Nome = UsuarioDTO.nome;
-            usuarioBase.CpfCnpj = UsuarioDTO.cpf_cnpj;
+            usuarioBase.CpfCnpj = UsuarioDTO.cpf;
             usuarioBase.Email = UsuarioDTO.email;
             // senha deve ser criptografada
             usuarioBase.Senha = UsuarioDTO.senha;
@@ -50,7 +51,7 @@ namespace mvpApi.Services
 
             usuarioDTO.nome = usuarioBase.Nome;
             usuarioDTO.email = usuarioBase.Email;
-            usuarioDTO.cpf_cnpj = usuarioBase.CpfCnpj;
+            usuarioDTO.cpf = usuarioBase.CpfCnpj;
             usuarioDTO.senha = usuarioBase.Senha;
 
             return usuarioDTO;
@@ -66,7 +67,7 @@ namespace mvpApi.Services
 
             usuarioDTO.nome = usuarioBase.Nome;
             usuarioDTO.email = usuarioBase.Email;
-            usuarioDTO.cpf_cnpj = usuarioBase.CpfCnpj;
+            usuarioDTO.cpf = usuarioBase.CpfCnpj;
             usuarioDTO.senha = usuarioBase.Senha;
 
             return usuarioDTO;
@@ -79,23 +80,24 @@ namespace mvpApi.Services
         {
             try
             {
-                // TODO: USUARIO REPOSITORY
-                var UsuarioSettings = _iUsuarioRepository.ConsultaUsuariosPorEmail(usuarioDTO.email).FirstOrDefault();
+                // retirando a mascara.
+                string cpfSemMascara = Regex.Replace(usuarioDTO.cpf, "[^0-9,]", "");
+                var UsuarioSettings = _iUsuarioRepository.ConsultaUsuariosPorCPF(cpfSemMascara).FirstOrDefault();
 
                 if (UsuarioSettings == null)
                 {
                     throw new Exception();
                 }
 
-                if (UsuarioSettings.Email.Equals(usuarioDTO.email)
+                if (UsuarioSettings.CpfCnpj.Equals(cpfSemMascara)
                     && UsuarioSettings.Senha.Equals(usuarioDTO.senha))                    
                     {
 
                     ClaimsIdentity identity =
-                        new ClaimsIdentity(new GenericIdentity(usuarioDTO.email, "Autenticacao"),
+                        new ClaimsIdentity(new GenericIdentity(usuarioDTO.cpf, "Autenticacao"),
                                             new[] {
                                                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
-                                                    new Claim(JwtRegisteredClaimNames.UniqueName, usuarioDTO.email),
+                                                    new Claim(JwtRegisteredClaimNames.UniqueName, usuarioDTO.cpf),
                                             });
 
                     DateTime dataCriacao = DateTime.Now;
